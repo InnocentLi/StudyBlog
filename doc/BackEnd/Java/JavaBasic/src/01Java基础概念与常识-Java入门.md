@@ -503,3 +503,1006 @@ Java 字节码是 Java 源代码经过编译器编译后得到的中间指令形
 所以，Java 是编程语言，JVM 是运行平台，两者不能完全画等号。
 
 
+## 6. 为什么说 Java 语言“编译与解释并存”？
+这是上一节的延伸问题，面试时经常一起提问。
+### 6.1 什么是编译型语言？
+编译（Compilation）是将一种语言表示转换为另一种表示的过程，通常涉及语法分析、类型检查、优化及代码生成。
+
+在传统的本地编译模式下，编译器会提前将源代码编译为目标平台的机器码。
+
+例如 C++：
+```mermaid
+flowchart TD
+    A["main.cpp"] --> B["C++ 编译器及链接器"]
+    B --> C["本地可执行程序"]
+    C --> D["操作系统加载"]
+    D --> E["CPU 执行"]
+```
+
+
+这种方式通常称为 Ahead-of-Time Compilation（AOT），即提前编译。
+### 6.2. 什么是解释型语言？
+解释执行（Interpretation）指解释器在运行时读取程序指令，并根据这些指令完成对应操作。
+
+例如，经典的 JVM 字节码解释器可以逐条处理：
+```bash
+iload_1
+iload_2
+iadd
+istore_3
+```
+
+解释器并不要求事先把整个方法都编译成本地机器码。
+
+但需要注意：解释器本身也是运行在 CPU 上的程序，因此不能说解释执行完全不涉及机器码。
+
+### 6.3 编译与解释有什么区别？
+| 比较项目 | 传统提前编译 | 解释执行 |
+| --- | --- | --- |
+| 翻译时机 | 运行之前 | 运行过程中 |
+| 执行形式 | 通常直接执行生成的本地代码 | 解释器执行程序指令 |
+| 启动开销 | 主要编译成本已提前支付 | 运行时可能有解释开销 |
+| 稳态性能 | 通常较高 | 逐条解释通常有额外开销 |
+| 跨平台 | 通常需要针对目标平台构建 | 取决于解释器和中间表示 |
+| 典型实现 | C++ 原生编译 | JVM 解释器、部分脚本语言解释器 |
+
+这里需要纠正大家通常意义上理解中一种容易产生误解的说法：
+
+<span style="color: red;">编译型不一定开发效率低，解释型也不一定执行速度慢。</span>
+
+现代语言可以同时使用编译、解释和 JIT。性能取决于编译器、运行时、程序算法、内存行为和工作负载。
+
+例如 JavaScript 引擎 V8 也使用 JIT；Python 也存在不同编译器与运行时实现。
+
+### 6.4 为什么 Java 同时具备两种特征？
+因为 Java 的典型执行过程分成两个阶段。
+
+第一阶段：编译
+
+```mermaid
+flowchart TD
+    A["Hello.java"] -->|javac| B["Hello.class"]
+```
+
+这一步属于编译。
+
+第二阶段：执行
+
+```mermaid
+flowchart TD
+    A["Hello.class<br/>字节码"] --> B["HotSpot JVM"]
+    B --> C["解释器<br/>解释执行字节码"]
+    B -->|热点代码| D["JIT 编译器"]
+    D --> E["本地机器码"]
+```
+
+这就说明 Java 并不是严格意义上的“纯解释执行语言”。
+### 6.5 JIT（即时编译）到底是什么？
+JIT 全称：
+
+Just-In-Time Compilation（即时编译）
+
+它是一种在程序运行过程中执行的编译技术。
+
+例如：
+```java
+public class JitExample {
+
+    public static int add(int a, int b) {
+        return a + b;
+    }
+
+    public static void main(String[] args) {
+
+        long result = 0;
+
+        for (int i = 0; i < 1_000_000; i++) {
+            result += add(i, 1);
+        }
+
+        System.out.println(result);
+    }
+}
+```
+
+在常见的 HotSpot 默认配置下，JVM 可以收集运行时数据，识别值得编译的方法或循环，再使用 JIT 进行优化。
+
+但编译并不是只看调用次数，也不保证每次运行这段示例都会发生相同的 JIT 行为。
+### 6.6 JIT 如何让 Java 更快？
+HotSpot JIT 可以进行多种优化。
+
+| 优化技术 | 英文 | 作用 |
+| --- | --- | --- |
+| 方法内联 | Method Inlining | 将适合的方法调用展开，减少调用开销并提供更多优化机会 |
+| 逃逸分析 | Escape Analysis | 分析对象是否可能被当前作用域外部访问 |
+| 标量替换 | Scalar Replacement | 在合适情况下用标量值替代对象 |
+| 循环优化 | Loop Optimization | 优化循环结构和执行成本 |
+| 死代码消除 | Dead Code Elimination | 移除对可观察结果没有影响的计算 |
+| 去虚拟化 | Devirtualization | 在具备足够类型信息时优化虚方法调用 |
+
+例如：
+
+```java
+public static int square(int x) {
+    return x * x;
+}
+
+public static int calculate(int value) {
+    return square(value) + 10;
+}
+```
+
+JIT 可能将 square() 内联到 calculate() 中，减少方法调用开销。
+
+需要强调：这些都是可能执行的优化，不是 JVM 对所有代码作出的保证。
+### 6.7 JIT 为什么需要预热（Warm-up）？
+JVM 在应用运行的过程中可以收集方法执行频率和类型分布等信息。
+
+因此，应用的性能可能随着运行过程发生变化。
+
+这也是为什么 Java 性能测试经常需要预热。
+
+示意关系如下：
+$$
+T_{\text{总执行}}\approx T_{\text{解释执行}}+T_{\text{JIT 编译}}+T_{\text{已编译代码执行}}+T_{\text{其他运行开销}}
+$$
+
+这里是将程序的主要执行成本进行概念性拆分，并不是说所有 Java 程序都必然经历每个阶段。
+
+> 面试标准回答：
+
+> Java 源代码首先通过 javac 编译为 JVM 字节码，这是编译过程。在常见的 HotSpot JVM 中，字节码可以由解释器执行；对于热点代码，JVM 还可以利用 JIT 在运行时编译成本地机器码，提高执行效率。因此，Java 通常被称为编译与解释并存的语言。
+
+## 7. AOT 有什么优点？为什么不全部使用 AOT？
+这一节是 Java 性能优化中比较重要的进阶知识，尤其与 Spring Boot、微服务、Docker 容器和云原生部署有关系。
+### 7.1 什么是 AOT？
+AOT 全称为：
+
+Ahead-of-Time Compilation（提前编译）
+
+其核心思想是：
+
+在程序正式运行之前，就提前完成代码编译。
+
+前面讲过 JIT（即时编译），两者最大的区别是编译发生的时间不同。
+| 编译技术 | 英文全称 | 编译时机 | 主要特点 |
+| --- | --- | --- | --- |
+| JIT | Just-In-Time Compilation | 程序运行期间 | 根据运行时信息优化热点代码 |
+| AOT | Ahead-of-Time Compilation | 程序执行之前 | 提前生成目标代码，减少运行时编译开销 |
+
+### 7.2 JIT 和 AOT 的执行流程有什么不同？
+JIT：常见的 HotSpot JVM 执行模式
+![Java 从源码编译到 HotSpot JVM 执行的流程图](../img/javabasic003.png)
+
+- **编译阶段：** `javac` 将 `Hello.java` 编译为 `Hello.class` 字节码。
+- **解释执行：** HotSpot JVM 加载字节码后，可以由解释器解释执行。
+- **JIT 编译：** JVM 根据运行时收集的信息识别热点代码，并可将其编译为本地机器码，再由 CPU 执行。
+- **协同工作：** 解释器和 JIT 可以共同参与程序执行；是否触发 JIT 及采用哪些优化，由 JVM 根据运行情况决定，并非所有代码都会被 JIT 编译。
+
+AOT：以 GraalVM Native Image 为例
+![GraalVM Native Image 的 AOT 提前编译流程](../img/javabasic004.png)
+
+这里的 Native Image 是提前生成本地可执行文件的技术。
+
+与常规 HotSpot JVM 模式相比，Native Image 产物通常不需要依赖外部安装的完整 JVM，且不会在运行时使用传统 HotSpot JIT 进行编译。
+
+不过，生成的可执行文件仍然包含垃圾回收、线程调度等所需的运行时支持组件。
+
+### 7.3 JIT 与 AOT 的完整对比
+
+| 比较维度 | JIT 即时编译 | AOT 提前编译（以 Native Image 为例） |
+| --- | --- | --- |
+| 编译时间 | 程序运行期间 | 应用构建期间 |
+| 编译输入 | JVM 字节码 | 应用字节码与依赖等 |
+| 启动速度 | 可能需要更多启动及预热时间 | 通常启动更快 |
+| 预热 | 通常存在 | 不需要传统 HotSpot JIT 预热 |
+| 长期运行性能 | 可以持续利用运行时信息优化 | 取决于提前优化质量与构建配置 |
+| 运行时内存 | 包含 JIT 编译器、代码缓存等开销 | 通常内存需求较低 |
+| 构建速度 | 构建相对直接 | Native Image 构建通常更耗时 |
+| 动态类加载 | 支持 | 受到较多限制 |
+| 反射 | 运行时支持广泛 | 动态访问可能需要元数据 |
+| Java Agent | 具有成熟支持 | 兼容性受限制 |
+| 典型应用 | 长期运行的 Java 后端服务 | Serverless、CLI、快速扩容服务 |
+| 部署产物 | 常见为 JAR / WAR | 本地可执行文件 |
+
+![JIT 与 AOT 编译流程简明对比](../img/javabasic005.png)
+
+注意：这里对比的是HotSpot JIT 模式与 GraalVM Native Image，并不代表所有 AOT 技术都具有完全相同的特点。
+### 7.4 AOT 为什么启动更快？
+先看一个典型的 Spring Boot 应用。
+
+使用普通 JVM 启动时，可能发生：
+
+```mermaid
+flowchart TD
+    A["启动 JVM"] --> B["加载应用类和框架类"]
+    B --> C["解析 Spring 配置"]
+    C --> D["扫描组件并注册 Bean"]
+    D --> E["创建和初始化 Bean"]
+    E --> F["启动 Web Server"]
+    F --> G["应用可以接收请求"]
+```
+
+这只是简化模型，并非严格的逐阶段时间顺序。
+
+在 Spring AOT + Native Image 模式下，部分框架分析、Bean 注册信息生成、代理类生成等工作可以提前在构建阶段完成。
+
+这样可以减少应用启动时需要完成的工作。
+
+用一个简化公式表示：
+$$
+T_{\text{启动}}=
+T_{\text{运行时初始化}}+
+T_{\text{框架初始化}}+
+T_{\text{业务初始化}}
+$$
+
+AOT 的目标之一，是将部分能够提前完成的初始化和分析工作转移到构建阶段。
+
+但是不能简单理解为：
+$$
+T_{\text{AOT 启动}}=0
+$$
+
+即使使用 AOT，程序依然需要初始化必要组件、建立连接、加载数据和启动服务。
+### 7.5 为什么 AOT 不一定比 JIT 快？
+假设存在一个长期运行的银行后端系统。
+
+每天处理大量用户请求：
+```java
+public class TransactionService {
+
+    public long calculateFee(long amount) {
+        return amount * 3 / 1000;
+    }
+}
+```
+
+如果这个方法被大量调用，JIT 可以根据实际运行情况优化执行过程。
+
+而 AOT 在编译阶段并不一定掌握完整的运行时信息。
+
+所以：
+
+AOT 通常更有利于减少启动和预热成本，JIT 则有机会在长期运行中获得更好的热点代码优化效果。
+
+但这并不是绝对规律。不同 AOT 编译器、Profile-Guided Optimization（PGO）以及不同业务负载，都可能改变性能结果。
+
+可以使用一个简化模型分析：
+$$
+T_{\text{总成本}}=
+T_{\text{启动}}+
+N\times T_{\text{单次请求}}
+$$
+
+其中：
+- $T_{\text{启动}}$：应用从启动到可用所需时间。
+- $N$：累计处理的请求数量。
+- $T_{\text{单次请求}}$：请求平均处理时间，简化假设下视为固定值。
+对于请求数量很少、实例频繁启动的场景，启动成本占比更高。
+
+对于长期运行、处理海量请求的系统，稳定运行阶段的吞吐量与延迟通常更加重要。
+
+因此，AOT 和 JIT 的选择需要结合实际工作负载进行基准测试。
+### 7.6 什么是闭世界分析（Closed-World Analysis）？
+这是原文中非常值得深入理解的概念。
+
+闭世界分析可以理解为：编译器在构建阶段，根据已知程序及其配置，尽可能确定运行时会使用哪些类、方法和资源。
+
+例如：
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        UserService service = new UserService();
+        service.sayHello();
+    }
+}
+
+class UserService {
+    public void sayHello() {
+        System.out.println("Hello");
+    }
+}
+
+```
+
+这里 UserService 的使用关系十分明确。
+
+AOT 编译器可以通过静态分析追踪：
+
+```mermaid
+flowchart TD
+    A["Main.main()"] --> B["new UserService()"]
+    B --> C["UserService.sayHello()"]
+```
+
+但反射就不同了。
+### 7.7 为什么反射会影响 AOT？
+先看下面这个完整示例。
+
+
+```java
+class UserService {
+    public UserService() {
+    }
+    public void sayHello() {
+        System.out.println("Hello");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        // 运行时从命令行读取类名
+        String className = args[0];
+        // 使用反射加载类
+        Class<?> clazz = Class.forName(className);
+        // 使用反射创建实例
+        Object instance = clazz.getDeclaredConstructor()
+                               .newInstance();
+        // 使用反射查找方法并调用
+        clazz.getMethod("sayHello").invoke(instance);
+    }
+}
+
+```
+
+运行：
+```bash
+javac Main.java
+java Main UserService
+```
+
+输出：
+```bash
+Hello
+```
+
+注意这里的关键代码：
+
+```java
+String className = args[0];
+```
+
+编译器仅仅分析代码，并不一定能够提前知道用户运行程序时会输入什么类名。
+
+例如，用户可能输入：
+```bash
+UserService
+OrderService
+PaymentService
+```
+
+普通 JVM 可以根据运行时输入，尝试动态加载对应类。
+
+但是在 GraalVM Native Image 中，如果某个类、构造方法或成员无法通过静态分析确定，又没有通过元数据保留下来，就可能发生运行时错误。
+
+这就是为什么 Native Image 对某些反射操作需要额外配置。
+graalvm.org+1
+
+```mermaid
+flowchart TD
+    A["运行时输入类名"] --> B["反射加载并调用"]
+    C["Native Image 构建期分析"] -.无法确定动态类名.-> B
+    C --> D["配置 Reachability Metadata"]
+    D --> E["保留所需类型和成员"]
+```
+
+#### AOT 是否完全不能使用反射？
+
+不是。
+
+GraalVM Native Image 支持反射，但对于静态分析无法识别的动态访问，可能需要通过 Reachability Metadata（可达性元数据）进行配置。
+
+例如在适用的 GraalVM 版本中，可以使用反射元数据声明需要保留的类型及成员。具体元数据格式和需要声明的成员类别取决于版本与实际操作。
+### 7.8 Spring Boot 如何解决 AOT 与反射的问题？
+Spring Boot 应用中经常使用：
+```java
+@Service
+public class UserService {
+
+    public String getName() {
+        return "Tom";
+    }
+}
+
+
+以及：
+@RestController
+public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/name")
+    public String getName() {
+        return userService.getName();
+    }
+}
+```
+
+普通 Spring 应用可以在运行时完成大量组件扫描、Bean 注册和元数据处理。
+
+而 Spring AOT 则可以在构建阶段分析应用上下文，生成用于初始化 Bean 的代码，以及反射、代理、资源访问等所需要的信息。
+
+例如，Spring 的 RuntimeHints 能用于声明 Native Image 运行时所需的反射、资源和代理支持。
+
+Spring 官方还明确说明，AOT 处理不仅可以用于 Native Image，也可以在 JVM 模式下启用。
+Spring 文档
+
+```mermaid
+flowchart LR
+    A["Spring 应用"] --> B["Spring AOT 构建期分析"]
+    B --> C["生成 Bean 初始化代码和 RuntimeHints"]
+    C --> D["JVM 运行"]
+    C --> E["Native Image 构建"]
+```
+
+### 7.9 为什么没有全部使用 AOT？
+核心原因可以总结为下表：
+
+| 原因 | 详细解释 |
+| --- | --- |
+| 构建成本较高 | Native Image 构建通常需要更多时间与资源 |
+| 动态特性适配 | 反射、代理、动态类加载可能需要额外处理 |
+| 第三方依赖兼容性 | 部分框架和库需要专门提供 AOT 支持 |
+| 长期运行性能 | 某些长期运行负载可能更适合 JIT |
+| 开发调试成本 | 构建、调试及问题排查方式可能更复杂 |
+| 运行时灵活性 | AOT 通常对运行时类路径及动态配置具有更多约束 |
+
+另外，关于原文的历史背景：
+
+JDK 9 曾通过 JEP 295 引入实验性的 jaotc AOT 编译工具，该工具后来已在 JDK 17 中移除。
+
+不要把已经移除的 jaotc 与目前仍然使用的 GraalVM Native Image 混为一谈。
+### 7.10 AOT 与 JIT 的关系公式
+$$
+\boxed{\text{JIT = 运行期间编译}}
+$$
+
+$$
+\boxed{\text{AOT = 运行之前编译}}
+$$
+
+$$
+\boxed{\text{Spring AOT}\neq\text{GraalVM Native Image}}
+$$
+
+最后一个关系特别重要：
+
+Spring AOT 是 Spring 框架的构建期处理机制，而 GraalVM Native Image 是提前编译成本地可执行文件的工具链。两者可以结合使用，但不是同一个组件。
+
+> 面试标准回答
+
+>AOT 是提前编译技术，能够将一部分编译工作放在应用运行之前完成。以 GraalVM Native Image 为例，它通常可以改善启动速度、减少运行时内存需求，因此适合冷启动敏感、频繁扩缩容等场景。
+
+>但 AOT 也存在构建成本较高、部分动态特性需要额外适配等限制。JIT 则能够根据真实运行时信息持续优化热点代码，因此长期运行的 Java 服务不一定适合全部改为 AOT。
+
+## 8. Oracle JDK vs OpenJDK
+这里首先要区分三个概念：
+
+Java 语言规范、OpenJDK 开源项目、Oracle JDK 产品发行版。
+
+它们不是同一个东西。
+### 8.1 什么是 OpenJDK？
+OpenJDK 是 Java SE 平台的重要开源实现项目。
+
+其中包含：
+- Java 编译器 javac
+- HotSpot JVM
+- Java 标准类库
+- 大量开发、诊断和调试工具
+OpenJDK 项目的源代码可以在 GitHub 查看：OpenJDK 官方源码仓库。许多常用的 JDK 发行版都是基于 OpenJDK 构建的。
+### 8.2 什么是 Oracle JDK？
+Oracle JDK 是 Oracle 发布和维护的 JDK 产品发行版。
+
+现代 Oracle JDK 的核心技术与 OpenJDK 高度接近，但它具有独立的产品发布、许可、支持和维护策略。
+
+因此，不应该简单理解为：
+
+“OpenJDK 是功能不完整的免费版，Oracle JDK 才是功能完整的商业版。”
+
+这种说法不准确。
+### 8.3 Oracle JDK 和 OpenJDK 对比
+
+| 对比项目 | OpenJDK | Oracle JDK |
+| --- | --- | --- |
+| 定位 | 开源 JDK 项目及其构建 | Oracle 的 JDK 产品发行版 |
+| 主要维护方 | Oracle 及社区中的多家组织 | Oracle |
+| 开源情况 | 项目源代码开放 | 主要基于 OpenJDK，产品构建和许可另有规定 |
+| 核心功能 | 提供完整 Java SE 实现 | 提供完整 Java SE 实现 |
+| JVM | 通常使用 HotSpot | 使用 HotSpot |
+| 编译器 | javac | javac |
+| 性能 | 取决于版本、构建与配置 | 取决于版本、构建与配置 |
+| 许可证 | Oracle OpenJDK 构建采用 GPLv2 + Classpath Exception | 根据版本及更新批次，可能采用 NFTC 或 OTN |
+| 商业支持 | 取决于发行商 | Oracle 提供商业支持 |
+| 典型差异 | 构建、工具、支持周期可能不同 | 许可证、支持及部分工具可能不同 |
+
+虽然 Oracle JDK 和 OpenJDK 的核心功能非常接近，但也不能说每个版本的二进制文件都完全一致。
+
+例如 Oracle 的 JDK 24 发布说明列出了部分发行差异，包括安装包、使用情况日志，以及某些编译器功能。
+Oracle
+
+### 8.4 什么是 Java Flight Recorder（JFR）？
+原文提到了：
+Java Flight Recorder（JFR）是一种监控工具。
+
+JFR 是 Java 的低开销事件记录和性能诊断机制。
+
+它能够记录 JVM 和应用运行期间的事件，例如：
+
+| 监控内容 | 作用 |
+| --- | --- |
+| CPU 相关事件 | 帮助分析性能瓶颈 |
+| 对象分配 | 观察内存分配行为 |
+| GC 事件 | 分析垃圾回收 |
+| 线程事件 | 帮助分析线程状态 |
+| 锁竞争 | 排查部分并发性能问题 |
+| 方法采样 | 识别热点执行路径 |
+
+例如，可以通过 JDK 的 jcmd 工具对正在运行的 JVM 发起 JFR 记录。
+
+JFR 并非始终属于 Oracle JDK 的独占功能。它已经进入 OpenJDK，因此现代 OpenJDK 发行版同样可以使用 JFR。
+
+Java Mission Control（JMC）则是用于分析 JFR 记录等信息的独立工具项目。
+
+### 8.5 Oracle JDK 是否免费？
+
+不能简单地回答“免费”或者“收费”。
+
+因为 Oracle JDK 的许可证会随着版本、更新批次及使用方式发生变化。
+
+这一点在 2026 年尤其重要。
+
+Oracle 于 2026 年 10 月 20 日更新的官方许可 FAQ，明确区分了不同版本的许可方式。
+Oracle
+
+### 8.6 2026 年 Oracle JDK 许可对比
+以下依据 Oracle 官方截至 2026 年 11 月的公开许可说明，具体使用仍应以对应软件包附带的许可证为准。
+
+| JDK 发行版及版本 | 主要许可 | 商业生产使用 |
+| --- | --- | --- |
+| Oracle OpenJDK | GPLv2 + Classpath Exception | 可以，需遵守开源许可 |
+| Oracle JDK 25 当前 NFTC 更新 | NFTC | 可以在许可条件内免费使用 |
+| Oracle JDK 21.0.12 及更早的 NFTC 更新 | NFTC | 符合许可条件时可以 |
+| Oracle JDK 21.0.13 及之后的更新 | OTN | 普通商业生产用途通常需要相应授权 |
+| Oracle JDK 17、11、8 的当前后续更新 | OTN / 相关商业授权 | 需要按具体使用场景判断 |
+
+特别需要注意：
+
+从 2026 年 10 月发布的 JDK 21.0.13 开始，Oracle JDK 21 的后续更新已经转向 OTN 许可。 
+Oracle+1
+
+这不意味着此前已经按 NFTC 下载的 JDK 21 版本会自动改变许可，也不意味着所有个人开发活动都必须付费。
+
+真正需要判断的是：你下载的是哪个发行版、哪个更新版本，以及你如何使用它。
+### 8.7 什么是 GPLv2 + Classpath Exception？
+GPLv2 是一种开源软件许可证。
+
+Classpath Exception 是为 Java 类库链接等场景提供的重要例外条款。
+
+可以简单理解为：
+
+开发者可以基于 OpenJDK 开发商业 Java 应用，并不因为使用了 OpenJDK 标准类库，就必须把自己的业务源代码全部公开。
+
+不过，如果修改、重新发布 OpenJDK 自身的组件，还需要遵守相应的许可证要求。
+
+所以：
+$$
+\boxed{\text{使用 OpenJDK 开发商业软件}\neq\text{必须开源全部业务代码}}
+$$
+
+### 8.8 为什么还有 Amazon Corretto、Eclipse Temurin 等 JDK？
+因为 OpenJDK 是开源项目，不同厂商可以基于 OpenJDK 源代码构建自己的 JDK 发行版，并提供不同的维护与支持方案。
+
+| JDK 发行版 | 维护方 | 主要特点 |
+| --- | --- | --- |
+| Oracle JDK | Oracle | Oracle 产品、许可及商业支持体系 |
+| Eclipse Temurin | Eclipse Adoptium | 常见的免费 OpenJDK 发行版 |
+| Amazon Corretto | AWS | Amazon 维护，提供长期支持版本 |
+| Microsoft Build of OpenJDK | Microsoft | Microsoft 维护的 OpenJDK 构建 |
+| Azul Zulu | Azul | 提供免费构建和商业支持方案 |
+| Alibaba Dragonwell | Alibaba | 基于 OpenJDK，侧重部分生产环境优化 |
+
+```mermaid
+flowchart TD
+    A["OpenJDK 源代码"] --> B["Oracle JDK"]
+    A --> C["Eclipse Temurin"]
+    A --> D["Amazon Corretto"]
+    A --> E["其他厂商发行版"]
+```
+
+### 8.9 实际工作中如何选择？
+对于 Java 21、Spring Boot、Gradle 和 MyBatis 项目，我更建议优先考虑一个维护周期清晰、更新及时且适合企业许可要求的 OpenJDK 发行版，例如 Eclipse Temurin 或 Amazon Corretto。
+
+如果企业明确规定使用 Oracle JDK，则应遵循企业的许可证和维护策略。
+
+尤其需要注意：JDK 是否能免费使用，与是否获得长期安全更新支持，是两个不同的问题。
+
+可以用下面这个关系概括：
+$$
+\boxed{\text{JDK 选型}=\text{兼容性}+\text{安全更新}+\text{支持周期}+\text{许可成本}}
+$$
+
+这不是数学上的加法计算，而是企业选型时应考虑的四个主要维度。
+
+> 面试标准回答
+
+OpenJDK 是 Java SE 平台的开源实现项目，Oracle JDK 则是 Oracle 提供的 JDK 产品发行版。
+
+现代 Oracle JDK 和 OpenJDK 的核心功能大体一致，主要区别通常体现在许可证、发布方式、维护周期、商业支持以及部分实现细节。
+
+对于企业项目，应根据 Java 版本、长期支持需求及许可证条件选择合适的 JDK 发行版，而不能简单认为 Oracle JDK 一定比 OpenJDK 性能更好。
+
+## 9. Java 和 C++ 的区别
+Java 和 C++ 都支持面向对象编程，也都具有封装、继承和多态等特性。
+
+但它们的语言设计、内存管理、编译模型和类型机制有明显区别。
+### 9.1 Java 与 C++ 总体对比
+
+| 比较项目 | Java | C++ |
+| --- | --- | --- |
+| 编程范式 | 主要支持面向对象，也支持函数式风格等 | 多范式：过程式、面向对象、泛型等 |
+| 编译方式 | 常见流程是编译为 JVM 字节码 | 通常编译为本地机器码 |
+| 运行环境 | 通常依赖 Java 运行时 | 通常直接作为本地程序运行 |
+| 内存管理 | 自动垃圾回收为主 | RAII、智能指针、手动管理等 |
+| 指针运算 | 不提供普通指针运算 | 支持指针和指针运算 |
+| 类继承 | 单继承 | 支持多重继承 |
+| 接口 | 支持 interface | 可通过抽象类等实现相似设计 |
+| 方法重载 | 支持 | 支持 |
+| 运算符重载 | 不支持用户自定义运算符重载 | 支持 |
+| 泛型机制 | 泛型，主要基于类型擦除 | 模板，通常在编译期实例化 |
+| 对象生命周期 | 通常由 GC 负责回收对象 | 可以通过确定性析构管理资源 |
+| 跨平台 | JVM 字节码具有可移植性 | 通常针对不同目标平台编译 |
+
+![Java 与 C++ 的执行和内存管理路径简明对比](../img/javabasic006.png)
+
+接下来深入解释其中最重要的四个区别。
+### 9.2 Java 为什么不提供普通指针运算？
+C++ 可以使用指针操作内存地址。
+
+例如：
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int number = 100;
+    int* ptr = &number;
+    cout << number << endl;
+    cout << *ptr << endl;
+    *ptr = 200;
+    cout << number << endl;
+    return 0;
+}
+
+```
+
+```cpp
+输出：
+100
+100
+200
+```
+
+这里：
+- &number：获取变量的内存地址。
+- int* ptr：定义一个整数指针。
+- *ptr：解引用指针，访问或修改它指向的整数。
+而 Java 中不能使用这种普通指针语法。
+
+但是 Java 可以通过对象引用操作对象。
+
+```java
+class Person {
+
+    String name;
+
+    Person(String name) {
+        this.name = name;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Person p1 = new Person("张三");
+        Person p2 = p1;
+        p2.name = "李四";
+        System.out.println(p1.name);
+        System.out.println(p2.name);
+    }
+}
+```
+
+```bash
+输出：
+李四
+李四
+```
+
+原因是 p1 与 p2 引用了同一个 Person 对象。
+
+可以这样理解：
+```mermaid
+flowchart TD
+    A["p1"] --> C["同一个 Person 对象<br/>name = 李四"]
+    B["p2"] --> C
+```
+
+Java 的引用不是 C++ 指针的直接等价物。
+
+Java 不允许通过普通引用进行任意内存地址运算，但 Java 并非绝对不可能访问本地内存。JNI、Foreign Function & Memory API 等机制可以提供受约束的本地互操作能力。
+### 9.3 Java 和 C++ 的内存管理有什么不同？
+这是两种语言非常重要的区别。
+
+在 C++ 中，可以使用动态内存分配：
+```cpp
+Person* p = new Person();
+// 使用对象
+delete p;
+```
+
+如果忘记 delete，可能造成内存泄漏。
+
+现代 C++ 通常推荐优先使用自动对象、RAII 和智能指针，而不是在业务代码中大量手写 new/delete。
+
+例如：
+```cpp
+auto p = std::make_unique<Person>();
+```
+
+当 unique_ptr 结束生命周期时，通常会自动释放所管理的对象。
+
+Java 则不同：
+```java
+Person p = new Person("张三");
+```
+
+Java 对象通常由 JVM 管理，其占用的堆内存在满足垃圾回收条件后，可以由 GC 回收。
+
+但请注意：
+
+Java 自动垃圾回收并不代表所有资源都会自动、及时释放。
+
+例如：
+```java
+FileInputStream input =
+        new FileInputStream("data.txt");
+```
+
+文件句柄属于需要及时关闭的资源。
+
+在 Java 中更推荐使用：
+```java
+try (FileInputStream input =
+         new FileInputStream("data.txt")) {
+    // 读取文件
+}
+```
+
+这叫 Try-with-resources，能够在退出代码块时自动调用 close()。
+对比总结：
+
+| 项目 | Java | C++ |
+| --- | --- | --- |
+| 常见堆内存管理 | GC | 智能指针或手动释放 |
+| 内存回收时机 | 通常由 GC 决定 | 可以由对象生命周期决定 |
+| 析构机制 | 没有 C++ 式确定性析构 | 支持析构函数 |
+| 文件资源释放 | try-with-resources | RAII |
+| 内存安全 | 避免普通悬空指针问题 | 需要正确管理对象和指针生命周期 |
+| 常见风险 | 对象保留、资源未关闭等 | 悬空指针、重复释放、内存泄漏等 |
+
+简化理解：
+$$
+\boxed{\text{Java：对象堆内存主要由 GC 管理}}
+$$
+
+$$
+\boxed{\text{C++：资源主要通过生命周期和所有权管理}}
+$$
+
+### 9.4 Java 为什么不支持类多继承？
+Java 的类只能直接继承一个父类。
+
+例如：
+```java
+class Animal {
+}
+
+class Dog extends Animal {
+}
+```
+
+但是不能这样写：
+```java
+class Dog extends Animal, Machine {
+}
+```
+
+这是非法 Java 语法。
+
+C++ 则允许：
+```cpp
+class Dog : public Animal, public Machine {
+};
+```
+
+为什么 Java 不支持类多继承？
+
+一个常见的设计考虑是多继承可能引入成员冲突和复杂的继承关系。
+
+例如：
+```mermaid
+flowchart TD
+    Animal --> A
+    Animal --> B
+    A --> C
+    B --> C
+```
+
+如果 A、B 都继承自 Animal，C 又同时继承 A、B，就可能涉及著名的菱形继承问题（Diamond Problem）。
+
+C++ 具有虚继承等机制来处理相应问题。
+
+Java 则采用另一种设计：类单继承，但一个类可以实现多个接口。
+```java
+interface Flyable {
+    void fly();
+}
+
+interface Swimmable {
+    void swim();
+}
+
+class Duck implements Flyable, Swimmable {
+
+    @Override
+    public void fly() {
+        System.out.println("飞行");
+    }
+
+    @Override
+    public void swim() {
+        System.out.println("游泳");
+    }
+}
+```
+
+这说明：
+$$
+\boxed{\text{Java 类：单继承 + 多接口实现}}
+$$
+
+注意，Java 8 开始接口支持 default 方法。如果多个接口提供冲突的默认方法，实现类需要按照 Java 的规则解决冲突，通常需要显式重写。
+### 9.5 Java 和 C++ 的泛型有什么不同？
+这是面试中比较深入的知识点。
+
+Java 使用 Generics（泛型）。
+```java
+List<String> names = new ArrayList<>();
+```
+
+C++ 使用 Templates（模板）。
+```cpp
+std::vector<std::string> names;
+```
+
+表面上看很相似，但底层机制不同。
+| 比较项目 | Java 泛型 | C++ 模板 |
+| --- | --- | --- |
+| 主要实现方式 | 类型擦除 | 编译期实例化 |
+| 编译期检查 | 支持 | 支持 |
+| 能否使用基本类型作为类型实参 | 通常不能直接使用 | 可以 |
+| 运行时类型信息 | 通常不保留具体泛型实参 | 具体实例化类型通常不同 |
+| 代码生成 | 多种泛型实参通常共享擦除后的实现 | 不同实例化可能生成不同代码 |
+| 典型问题 | 类型擦除、桥方法 | 模板实例化、代码膨胀 |
+
+例如 Java：
+```java
+List<String> a = new ArrayList<>();
+List<Integer> b = new ArrayList<>();
+System.out.println(a.getClass() == b.getClass());
+```
+输出：
+> true
+
+
+因为运行时它们对应的是同一个 ArrayList 类。
+
+但是 C++：
+```cpp
+std::vector<int>
+std::vector<double>
+```
+
+是不同的模板实例化类型。
+
+这里需要注意：Java 泛型并非完全没有类型信息，例如字段和方法声明的泛型签名可以保存在类文件元数据中，并能通过反射读取。
+
+所谓类型擦除，主要是指普通对象在运行时不会为每一种泛型参数实例化单独生成一个类。
+### 9.6 Java 为什么不支持用户自定义运算符重载？
+C++ 支持通过 operator 为自定义类型定义运算符行为。
+
+例如：
+
+```java
+class Point {
+public:
+    int x;
+
+    Point(int value) : x(value) {}
+
+    Point operator+(const Point& other) const {
+        return Point(x + other.x);
+    }
+};
+```
+
+这样可以执行：
+```java
+Point a(10);
+Point b(20);
+
+Point c = a + b;
+```
+
+Java 不支持开发者自定义这种 + 运算符。
+
+通常需要写成：
+```java
+class Point {
+    private final int x;
+    Point(int x) {
+        this.x = x;
+    }
+    public Point add(Point other) {
+        return new Point(this.x + other.x);
+    }
+}
+
+```
+调用：
+
+```java
+Point a = new Point(10);
+Point b = new Point(20);
+
+Point c = a.add(b);
+```
+
+Java 的设计倾向于使用明确的方法来表达用户自定义类型的操作。
+
+不过，Java 语言本身对字符串拼接等场景有特殊的 + 运算规则，这不属于用户自定义运算符重载。
+### 9.7 Java 和 C++ 的性能谁更好？
+不能简单认为 C++ 一定比 Java 快。
+
+C++ 在直接控制内存、减少运行时抽象开销等方面具有优势。
+
+但现代 Java JVM 可以利用 JIT、逃逸分析、方法内联等技术获得较高性能。
+
+还需要考虑：
+
+| 维度 | 主要影响因素 |
+| --- | --- |
+| CPU 性能 | 算法、编译优化、指令执行效率 |
+| 内存性能 | 分配方式、数据布局、缓存命中率 |
+| 延迟 | GC、锁竞争、系统调用、调度 |
+| 吞吐量 | 并发模型、数据库、网络、线程池 |
+| 启动时间 | 类加载、框架初始化、运行时构建方式 |
+| 开发成本 | 语言安全性、工具生态、团队维护能力 |
+
+在银行业务系统中，一个接口可能需要执行数据库查询：
+
+```java
+public User getUser(Long id) {
+    return userMapper.selectById(id);
+}
+```
+
+这个接口的整体响应时间，很可能主要花费在 SQL 查询、网络通信和数据库锁等待上，而不是 Java 与 C++ 之间的机器指令差异。
+
+因此评价语言性能时，必须明确测试环境和具体工作负载。

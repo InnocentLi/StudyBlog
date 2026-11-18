@@ -1,0 +1,12 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    init: true
+    stdin_open: true
+    tty: true
+    command: ["sleep", "infinity"]

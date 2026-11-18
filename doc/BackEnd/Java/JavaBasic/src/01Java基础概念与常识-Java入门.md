@@ -1,5 +1,5 @@
-# 基础概念与常识
-## Java 是什么？
+# 01Java基础概念与常识-Java入门--基础概念与常识
+## 0. Java 是什么？
 Java 是一种面向对象、静态类型、跨平台的编程语言。
 
 Java 最初由 Sun Microsystems 开发，1995 年正式发布，后来 Sun 被 Oracle 收购。
@@ -26,12 +26,12 @@ Java 有什么特点？
 > 因为 Java 源代码通常先通过 javac 编译成平台无关的字节码，再由对应平台的 JVM 执行。
 > Java 不是直接将同一份机器码运行在所有操作系统上，而是通过不同平台上的 JVM 实现跨平台。
 
-## Java 基础概念与常识：Java SE、Java EE、Java ME、JVM、JRE、JDK
+## 1.Java 基础概念与常识：Java SE、Java EE、Java ME、JVM、JRE、JDK
 这六个概念经常一起出现在 Java 面试中，但实际上它们属于两个不同的知识体系：
 - Java SE、Java EE、Java ME：表示 Java 平台的不同版本或应用领域。
 - JVM、JRE、JDK：表示 Java 程序的执行环境、运行环境和开发工具。
 一、Java SE vs Java EE vs Java ME
-### 1. 什么是 Java SE？
+### 1.1 什么是 Java SE？
 Java SE（Java Platform, Standard Edition），即 Java 平台标准版，是 Java 开发的基础平台。
 它提供 Java 的核心语言特性、基础类库及运行 Java 程序所需要的相关组件。
 例如，我们平时使用的以下功能都属于 Java SE 范畴：
@@ -48,7 +48,7 @@ Connection connection = DriverManager.getConnection(url);
 ```
 
 注意，Java SE 并不意味着只能开发简单程序。它同样可以构建复杂的服务器端应用。
-### 2. 什么是 Java EE？
+### 1.2 什么是 Java EE？
 Java EE（Java Platform, Enterprise Edition），即 Java 平台企业版。
 
 Java EE 在 Java SE 的基础上提供企业级应用开发所需要的一系列标准规范和 API。
@@ -80,14 +80,14 @@ import javax.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServlet;
 ```
 这也解释了为什么现代 Spring Boot 项目中经常会出现 jakarta.*。
-### 3. 什么是 Java ME？
+### 1.3 什么是 Java ME？
 Java ME（Java Platform, Micro Edition），即 Java 平台微型版。
 
 主要针对资源受限的设备，例如早期功能手机、机顶盒及部分嵌入式设备。
 它提供适合特定设备环境的 API 和运行配置。
 现在 Java ME 在主流企业后端开发中已经比较少见，但并非完全消失。
 
-### 4. 三者对比表
+### 1.4 三者对比表
 
 
 | 比较项目 | Java SE | Java EE / Jakarta EE | Java ME |
@@ -125,11 +125,11 @@ public class UserController {
 - 内嵌 Tomcat 提供 Servlet 容器，执行相关 Servlet API 规范。
 因此，学习 Spring Boot 并不要求先学习所有 Java EE 规范，但理解 Servlet、JPA 和事务规范十分有帮助。
 
-## 二、JVM vs JRE vs JDK
+## 2、JVM vs JRE vs JDK
 这三个概念分别对应不同的职责：
 
 JVM 负责执行，JRE 提供运行环境，JDK 提供开发工具和运行能力。
-### 1. JVM：Java 虚拟机
+### 2.1 JVM：Java 虚拟机
 JVM（Java Virtual Machine）是 Java 虚拟机，负责加载、验证并执行 Java 字节码。
 
 其核心功能包括：
@@ -155,11 +155,13 @@ public class Hello {
 ```
 
 首先使用：
+```bash
 javac Hello.java
-
+```
 生成：
+```
 Hello.class
-
+```
 
 这个 .class 文件通常可以在 Windows、Linux 和 macOS 上的兼容 JVM 中执行。
 
@@ -184,7 +186,7 @@ JVM 是否只有一种？
 
 只要遵循相应 JVM 规范，理论上不同组织都可以开发自己的 JVM。
 
-### 2. JRE：Java 运行环境
+### 2.2 JRE：Java 运行环境
 
 JRE（Java Runtime Environment）主要提供运行 Java 程序所需要的组件。
 
@@ -204,7 +206,7 @@ System.out.println("Hello");
 JVM 负责执行字节码，而标准类库为程序提供 API。
 
 只有 JVM 而没有程序需要的类库，通常无法运行正常的 Java 应用。
-### 3. JDK：Java 开发工具包
+### 2.3 JDK：Java 开发工具包
 JDK（Java Development Kit）是 Java 开发工具包。
 
 传统概念中：
@@ -228,7 +230,7 @@ JDK（Java Development Kit）是 Java 开发工具包。
 其中需要特别注意：
 
 javap 不是将字节码完整还原为 Java 源代码的反编译器，主要用于查看类信息、方法签名和字节码指令。
-### 4. JVM、JRE、JDK 对比表
+### 2.4 JVM、JRE、JDK 对比表
 
 | 对比项目 | JVM | JRE | JDK |
 | --- | --- | --- | --- |
@@ -242,7 +244,7 @@ javap 不是将字节码完整还原为 Java 源代码的反编译器，主要�
 | 面试重要性 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 
 
-## 三、JDK 9 之后为什么不再强调 JRE？
+## 3. JDK 9 之后为什么不再强调 JRE？
 在 Java 8 以及更早版本中，JDK 和独立 JRE 的区别比较明显。
 
 但从 Java 9 开始，Java 引入了模块系统（Java Platform Module System，JPMS）。
@@ -292,7 +294,7 @@ JDK 9 前后对比
 
 不过 JRE 的概念没有消失。Java 程序仍然需要运行时环境，只是现代 Java 可以通过模块化方式构建它。
 
-## 四、Java 程序完整执行流程
+## 4. Java 程序完整执行流程
 以最常见的 HotSpot JVM 为例：
 
 第一阶段：开发和编译
@@ -307,11 +309,11 @@ JIT 是运行时即时编译，把热点字节码转换成本地机器码。
 
 两者不是同一个编译器，也不发生在同一个阶段。
 
-## 五、Java 面试标准回答
-面试官：请说一下 Java SE、Java EE、JVM、JRE、JDK 的区别。
 
-可以这样回答：
-Java SE 是 Java 标准平台，提供核心语言特性和基础类库；Java EE 是在 Java SE 基础上提供企业级开发规范的平台，现在已经发展为 Jakarta EE。Java ME 则主要面向资源受限设备。
+> 面试官：请说一下 Java SE、Java EE、JVM、JRE、JDK 的区别。
+
+> 可以这样回答：
+> Java SE 是 Java 标准平台，提供核心语言特性和基础类库；Java EE 是在 Java SE 基础上提供企业级开发规范的平台，现在已经发展为 Jakarta EE。Java ME 则主要面向资源受限设备。
 
 JVM 是 Java 虚拟机，负责执行 Java 字节码，并提供内存管理、垃圾回收和即时编译等能力。
 
@@ -335,8 +337,8 @@ $$
 
 对于 Spring Boot 开发和 Java 面试来说，Java SE、JVM 和 JDK 是必须深入掌握的基础；Jakarta EE 重点理解 Servlet、JPA、JTA 等规范；Java ME 了解概念即可。
 
-## 六，什么是字节码？采用字节码的好处是什么？
-> 什么是字节码（Bytecode）？
+## 5. 什么是字节码？采用字节码的好处是什么？
+### 5.1 什么是字节码（Bytecode）？
 字节码（Bytecode）是 Java 编译器生成的一种中间指令形式，能够被 JVM 识别和执行。
 
 在常见的 Java 开发流程中：
@@ -370,3 +372,134 @@ Hello.class
 
 需要注意：.class 是类文件的扩展名，不是字节码本身的定义。
 一个 .class 文件除了字节码指令，还包含<span style="color: red;">常量池、字段、方法、属性</span>等结构信息。
+
+### 5.2 为什么不直接把 Java 编译成机器码？
+先区分三个重要概念。
+| 概念 | 英文 | 作用 | 示例 |
+| --- | --- | --- | --- |
+| 源代码 | Source Code | 程序员编写的代码 | `int a = 10;` |
+| 字节码 | Bytecode | JVM 使用的中间指令 | `bipush 10` |
+| 机器码 | Machine Code | CPU 可以执行的指令 | x86-64、ARM64 指令 |
+
+以加法为例：
+Java 源代码
+
+$$
+\text{int } c = a + b
+$$
+
+javac 编译
+```text
+JVM 字节码
+iload_1
+iload_2
+iadd
+istore_3
+```
+
+
+```mermaid
+flowchart TB
+    A["JVM 字节码"] --> B["JVM 执行"]
+    B --> C["解释器：解释执行字节码"]
+    B -->|热点代码| D["JIT 编译器"]
+    D --> E["本地机器码"]
+    C --> F{"当前 CPU 架构"}
+    E --> F
+    F -->|x86-64| G["Intel / AMD CPU"]
+    F -->|ARM64| H["Apple Silicon 等"]
+```
+
+
+这里的 iload、iadd、istore 都是 JVM 指令，而不是 CPU 指令。
+
+例如：
+- iload_1：将局部变量槽位 1 中的 int 加载到操作数栈。
+- iload_2：将局部变量槽位 2 中的 int 加载到操作数栈。
+- iadd：取出栈顶两个整数并相加，再将结果压栈。
+- istore_3：把结果保存到局部变量槽位 3。
+这些指令不依赖于具体 CPU 的指令集，由 JVM 实现负责解释或者编译执行。
+
+### 5.3 字节码有什么优点？
+原文主要强调了两点：跨平台和执行效率。除此之外，字节码还具有便于验证、优化及工具处理等优点。
+| 优点 | 具体解释 |
+| --- | --- |
+| 跨平台 | 同一个 `.class` 文件可以在兼容的不同平台 JVM 上运行 |
+| 可移植性 | 通常不需要为每个 CPU 架构重新编译 Java 源码 |
+| 运行时优化 | JVM 可以利用 JIT 对热点代码进行优化 |
+| 安全性 | JVM 在类加载过程中进行字节码验证 |
+| 语言互操作 | Kotlin、Scala 等语言也可以编译为 JVM 字节码 |
+| 工具生态 | ASM、Byte Buddy 等工具可以分析或修改字节码 |
+
+优点①：跨平台
+假设我们在 Windows 上编译：
+
+>javac Hello.java
+
+
+然后把生成的 Hello.class 复制到 Linux 或 macOS。
+
+如果目标环境中具有兼容的 Java 运行时，并且程序没有依赖不兼容的本地库或系统特性，通常可以直接运行：
+> java Hello
+这就是：
+
+> Write Once, Run Anywhere（一次编写，到处运行）
+
+更准确地说，是符合 JVM 规范的字节码具有跨平台能力，并不意味着所有 Java 应用在任何系统上都绝对没有兼容性问题。
+优点②：支持 JIT 性能优化
+Java 不必一直逐条解释同一段字节码。
+
+对于频繁运行的方法，HotSpot JVM 可以将它们编译成本地机器码。
+
+例如：
+```java
+public static long calculate() {
+    long sum = 0;
+
+    for (int i = 0; i < 1_000_000; i++) {
+        sum += i;
+    }
+
+    return sum;
+}
+```
+
+如果这个方法被频繁调用，JVM 可能将它识别为热点方法，并利用 JIT 进行优化。
+
+需要注意：不是循环执行一百万次就必然触发 JIT，是否编译以及如何优化，取决于运行时统计数据、编译阈值和 JVM 配置。
+
+### 5.4 为什么 JVM 可以执行不同编程语言？
+因为 JVM 的执行对象是符合 JVM 规范的字节码，而不是 Java 源代码。
+
+例如：
+![Java、Kotlin 和 Scala 编译并运行流程](../img/javabasic002.png)
+
+所以，Java 是编程语言，JVM 是运行平台，两者不能完全画等号。
+### 5.5 字节码相关公式
+关系式一：Java 典型编译流程
+$$
+\boxed{\text{Java 源码}\xrightarrow{\text{javac}}\text{JVM 字节码}}
+$$
+
+关系式二：字节码运行流程
+$$
+\boxed{\text{字节码}\xrightarrow{\text{JVM}}\text{执行效果}}
+$$
+
+关系式三：跨平台的核心条件
+$$
+\boxed{\text{统一字节码格式}+\text{兼容 JVM 实现}\Rightarrow\text{跨平台运行能力}}
+$$
+
+
+
+面试标准回答：
+
+Java 字节码是 Java 源代码经过编译器编译后得到的中间指令形式。它不直接依赖具体的 CPU 指令集，而是由 JVM 负责执行。字节码让 Java 具备良好的跨平台能力，同时 JVM 可以通过解释器和 JIT 编译器执行及优化字节码，因此兼顾可移植性和运行效率。
+
+因为 JVM 的执行对象是符合 JVM 规范的字节码，而不是 Java 源代码。
+
+
+所以，Java 是编程语言，JVM 是运行平台，两者不能完全画等号。
+
+

@@ -1,3 +1,8 @@
+/**
+ * 封装示例
+ *  docker run --rm --mount "type=bind,source=${PWD}\BackEnd\Java\JavaBasic,target=/src,readonly" eclipse-temurin:17-jdk sh -c 'javac -encoding UTF-8 -d /tmp /src/02Encapsulation.java && java -cp /tmp BackEnd.Java.JavaBasic.Student'
+ */
+
 package BackEnd.Java.JavaBasic;
 
 class Student {

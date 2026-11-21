@@ -1,4 +1,4 @@
-# 01Java基础概念与常识-Java入门--基础概念与常识
+# 01 Java基础概念与常识-Java入门--基础概念与常识
 ## 0. Java 是什么？
 Java 是一种面向对象、静态类型、跨平台的编程语言。
 
@@ -472,6 +472,7 @@ public static long calculate() {
 因为 JVM 的执行对象是符合 JVM 规范的字节码，而不是 Java 源代码。
 
 例如：
+
 ![Java、Kotlin 和 Scala 编译并运行流程](../img/javabasic002.png)
 
 所以，Java 是编程语言，JVM 是运行平台，两者不能完全画等号。
@@ -578,6 +579,7 @@ flowchart TD
 
 这就说明 Java 并不是严格意义上的“纯解释执行语言”。
 ### 6.5 JIT（即时编译）到底是什么？
+
 JIT 全称：
 
 Just-In-Time Compilation（即时编译）
@@ -878,7 +880,6 @@ PaymentService
 但是在 GraalVM Native Image 中，如果某个类、构造方法或成员无法通过静态分析确定，又没有通过元数据保留下来，就可能发生运行时错误。
 
 这就是为什么 Native Image 对某些反射操作需要额外配置。
-graalvm.org+1
 
 ```mermaid
 flowchart TD
@@ -975,11 +976,7 @@ $$
 
 Spring AOT 是 Spring 框架的构建期处理机制，而 GraalVM Native Image 是提前编译成本地可执行文件的工具链。两者可以结合使用，但不是同一个组件。
 
-> 面试标准回答
-
->AOT 是提前编译技术，能够将一部分编译工作放在应用运行之前完成。以 GraalVM Native Image 为例，它通常可以改善启动速度、减少运行时内存需求，因此适合冷启动敏感、频繁扩缩容等场景。
-
->但 AOT 也存在构建成本较高、部分动态特性需要额外适配等限制。JIT 则能够根据真实运行时信息持续优化热点代码，因此长期运行的 Java 服务不一定适合全部改为 AOT。
+> 面试标准回答 <BR> AOT 是提前编译技术，能够将一部分编译工作放在应用运行之前完成。以 GraalVM Native Image 为例，它通常可以改善启动速度、减少运行时内存需求，因此适合冷启动敏感、频繁扩缩容等场景。<br>但 AOT 也存在构建成本较高、部分动态特性需要额外适配等限制。JIT 则能够根据真实运行时信息持续优化热点代码，因此长期运行的 Java 服务不一定适合全部改为 AOT。
 
 ## 8. Oracle JDK vs OpenJDK
 这里首先要区分三个概念：
@@ -1129,9 +1126,7 @@ $$
 
 这不是数学上的加法计算，而是企业选型时应考虑的四个主要维度。
 
-> 面试标准回答
-
-OpenJDK 是 Java SE 平台的开源实现项目，Oracle JDK 则是 Oracle 提供的 JDK 产品发行版。
+> 面试标准回答<BR>OpenJDK 是 Java SE 平台的开源实现项目，Oracle JDK 则是 Oracle 提供的 JDK 产品发行版。
 
 现代 Oracle JDK 和 OpenJDK 的核心功能大体一致，主要区别通常体现在许可证、发布方式、维护周期、商业支持以及部分实现细节。
 
@@ -1201,7 +1196,6 @@ int main() {
 class Person {
 
     String name;
-
     Person(String name) {
         this.name = name;
     }
@@ -1232,7 +1226,6 @@ flowchart TD
     A["p1"] --> C["同一个 Person 对象<br/>name = 李四"]
     B["p2"] --> C
 ```
-
 Java 的引用不是 C++ 指针的直接等价物。
 
 Java 不允许通过普通引用进行任意内存地址运算，但 Java 并非绝对不可能访问本地内存。JNI、Foreign Function & Memory API 等机制可以提供受约束的本地互操作能力。
@@ -1270,8 +1263,7 @@ Java 自动垃圾回收并不代表所有资源都会自动、及时释放。
 
 例如：
 ```java
-FileInputStream input =
-        new FileInputStream("data.txt");
+FileInputStream input = new FileInputStream("data.txt");
 ```
 
 文件句柄属于需要及时关闭的资源。
@@ -1506,3 +1498,368 @@ public User getUser(Long id) {
 这个接口的整体响应时间，很可能主要花费在 SQL 查询、网络通信和数据库锁等待上，而不是 Java 与 C++ 之间的机器指令差异。
 
 因此评价语言性能时，必须明确测试环境和具体工作负载。
+
+
+
+## 10. Java 注释
+Java 支持三种注释方式。
+| 类型 | 语法 | 作用 |
+| --- | --- | --- |
+| 单行注释 | `//` | 解释某一行代码 |
+| 多行注释 | `/* ... */` | 解释一段逻辑 |
+| 文档注释 | `/** ... */` | 编写 API 文档，可通过 Javadoc 生成文档 |
+
+![Java 注释示例](../img/javabasic007.png)
+
+### 10.1 重点
+- 注释不参与程序执行，通常不保留在 .class 字节码中。
+- 文档注释可以使用 @param、@return、@throws 等标签。
+- 注释不是越多越好，优先使用清晰的命名表达代码意图。
+
+例如：
+```java
+// 不推荐：判断员工是否符合福利条件
+if ((employee.flags & HOURLY_FLAG) != 0
+        && employee.age > 65) {
+}
+
+// 推荐：通过方法名表达业务意图
+if (employee.isEligibleForFullBenefits()) {
+}
+```
+
+核心思想：好的代码应该尽可能做到自解释。
+
+## 11. 标识符与关键字
+### 11.1 什么是标识符？
+标识符（Identifier）就是程序员为变量、方法、类等定义的名称。
+```java
+public class UserService {
+
+    private String userName;
+
+    public void sayHello() {
+        System.out.println("Hello");
+    }
+}
+```
+
+其中：
+- UserService：类名
+- userName：变量名
+- sayHello：方法名
+这些都是标识符。
+### 11.2 什么是关键字？
+关键字（Keyword）是 Java 语言预先定义、具有特殊语法意义的单词。
+
+例如：
+```java
+public class User {
+
+    private int age;
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+```
+
+public、class、private、int、void、this 都具有特殊含义。
+### 11.3 常见关键字分类
+| 分类 | 常见关键字 |
+| --- | --- |
+| 访问控制 | public、private、protected |
+| 类和对象 | class、interface、extends、implements、new |
+| 修饰符 | static、final、abstract、synchronized、volatile |
+| 条件判断 | if、else、switch、case |
+| 循环控制 | for、while、do、break、continue |
+| 异常处理 | try、catch、finally、throw、throws |
+| 类型 | int、long、boolean、double、char 等 |
+| 其他 | this、super、return、package、import |
+
+注意：这是常见关键字汇总，不是完整的现代 Java 关键字、受限标识符及上下文关键字列表。
+### 11.4 `default` 的三种常见用法
+#### ① `switch` 中的默认分支
+```java
+switch (num) {
+    case 1:
+        System.out.println("One");
+        break;
+
+    default:
+        System.out.println("Other");
+}
+```
+
+#### ② `interface` 中的默认方法（Java 8）
+```java
+interface Animal {
+    default void eat() {
+        System.out.println("Eating...");
+    }
+}
+```
+
+实现类可以继承该默认实现。
+
+#### ③ 默认访问权限（package-private）
+```java
+class User {
+    void sayHello() {
+        System.out.println("Hello");
+    }
+}
+```
+
+没有写访问修饰符时，表示包级访问权限（package-private）。
+
+注意：不能显式写 default 作为访问修饰符。
+```java
+default class User { } // 编译错误
+```
+
+补充两个面试细节：
+- true、false、null 是字面量，不是关键字，也不能作为标识符。
+- Java 的关键字区分大小写；现代 Java 还有 record、sealed、var 等具有特定使用场景的受限标识符或上下文关键字。
+
+## 12. 自增自减运算符（高频笔试）
+Java 提供：
+- ++：增加 1
+- --：减少 1
+### 12.1 前缀与后缀的区别
+| 表达式 | 执行规则 |
+| --- | --- |
+| `++a` | 先增加，再取值 |
+| `a++` | 先取值，再增加 |
+| `--a` | 先减少，再取值 |
+| `a--` | 先取值，再减少 |
+
+例如：
+```java
+int a = 10;
+
+int b = a++;  // b = 10, a = 11
+int c = ++a;  // a = 12, c = 12
+```
+
+记忆口诀：符号在前，先修改；符号在后，先取值。
+### 12.2 高频面试题
+```java
+int a = 9;
+int b = a++;
+int c = ++a;
+int d = c--;
+int e = --d;
+```
+
+逐行分析：
+| 执行语句 | 发生的变化 | 说明 |
+| --- | --- | --- |
+| `int a = 9` | `a = 9` | 初始化 |
+| `int b = a++` | `b = 9，a = 10` | 先赋值再自增 |
+| `int c = ++a` | `a = 11，c = 11` | 先自增再赋值 |
+| `int d = c--` | `d = 11，c = 10` | 先赋值再自减 |
+| `int e = --d` | `d = 10，e = 10` | 先自减再赋值 |
+
+最终结果：
+```text
+a = 11
+b = 9
+c = 10
+d = 10
+e = 10
+```
+
+
+## 13. 移位运算符（重点）
+移位运算符用于直接操作整数的二进制位。
+
+Java 有三种主要的移位运算符。
+| 运算符 | 名称 | 规则 |
+| --- | --- | --- |
+| `<<` | 左移 | 整体左移，低位补 0 |
+| `>>` | 带符号右移 | 右移，左边补符号位 |
+| `>>>` | 无符号右移 | 右移，左边始终补 0 |
+
+### 13.1 左移运算符 `<<`
+```java
+int a = 5;
+System.out.println(a << 2); // 20
+```
+
+以 8 位展示正整数 5 的左移过程：
+左移两位：00000101 → 00010100，十进制 5 → 20。
+
+公式：
+$$
+x \ll n = x \times 2^n
+$$
+
+前提：结果不能超出类型的表示范围。
+### 13.2 带符号右移 `>>`
+```java
+int a = 20;
+
+System.out.println(a >> 2); // 5
+```
+
+对于非负整数：
+$$
+x \gg n = \left\lfloor \frac{x}{2^n} \right\rfloor
+$$
+
+对于负整数，Java 的算术右移同样相当于向负无穷取整：
+```java
+System.out.println(-9 >> 1); // -5
+```
+
+因为：
+$$
+\left\lfloor -9/2 \right\rfloor = -5
+$$
+
+注意：负数右移不能简单理解成 Java 整数除法。 Java 整数除法向零截断，-9 / 2 的结果是 -4。
+### 13.3 无符号右移 `>>>`
+```java
+int a = -8;
+
+System.out.println(a >> 1);  // -4
+System.out.println(a >>> 1); // 2147483644
+```
+
+最重要的区别：
+```text
+>>：保留符号扩展，因此负数右移后通常仍为负数。
+>>>：左边统一补 0，所以负的 int 经非零位数的无符号右移后可能得到很大的正数。
+```
+### 13.4 移位位数超过 32 怎么办？
+Java 对移位距离进行掩码处理：
+
+| 类型 | 有效移位距离 | 示例 |
+| --- | --- | --- |
+| `int` | `n & 31` | `42 & 31 = 10` |
+| `long` | `n & 63` | `70 & 63 = 6` |
+
+
+```java
+int a = 1;
+
+System.out.println(a << 10); // 1024
+System.out.println(a << 42); // 1024
+
+long b = 1L;
+
+System.out.println(b << 70); // 64
+```
+
+**面试必记：**
+- int 移位 32 位，相当于移位 0 位。
+- int 移位 42 位，相当于移位 10 位。
+- long 移位 70 位，相当于移位 6 位。
+
+此外：
+- byte、short、char 移位前会进行整型提升，结果类型为 int。
+- float、double 不支持移位。
+- 移位操作通常高效，但不要认为它一定比乘除法快，现代 JVM 的 JIT 编译器也会进行算术优化。
+
+## 14. HashMap 为什么要使用 `>>> 16`？
+JDK 8 中，HashMap 的散列扰动函数如下：
+```java
+static final int hash(Object key) {
+    int h;
+
+    return (key == null)
+        ? 0
+        : (h = key.hashCode()) ^ (h >>> 16);
+}
+```
+
+这里涉及两种运算符：
+| 运算符 | 作用 |
+| --- | --- |
+| `>>>` | 无符号右移 |
+| `^` | 按位异或（不同为 1，相同为 0） |
+
+主要目的：
+
+将原始哈希值的高 16 位与低 16 位混合，降低某些哈希分布不均造成的碰撞概率。
+
+过程如下：
+1. `h` 保存键的原始哈希值。
+2. `h >>> 16` 将高 16 位移到低 16 位所在的位置。
+3. `h ^ (h >>> 16)` 将高位信息与低位信息异或混合。
+
+为什么这样设计？
+
+HashMap 的桶数组长度通常为 2 的幂，计算索引使用：
+```java
+index = (n - 1) & hash;
+```
+
+当数组长度较小时，只会利用 hash 的低若干位来确定桶索引。
+
+因此，h ^ (h >>> 16) 可以让原本的高位信息参与低位计算，从而改善某些情况下的分布。
+
+注意：这不能彻底消除哈希冲突，也不是加密哈希算法。
+
+## 15. `continue`、`break`、`return` 的区别
+这是 Java 基础面试中非常常见的题目。
+| 关键字 | 作用 | 影响范围 |
+| --- | --- | --- |
+| `continue` | 跳过本次循环剩余代码 | 当前循环的一次迭代 |
+| `break` | 结束当前循环或 `switch` | 当前循环或 `switch` |
+| `return` | 结束当前方法 | 整个方法 |
+
+### 15.1 `continue`
+```java
+for (int i = 0; i < 3; i++) {
+    if (i == 1) {
+        continue;
+    }
+    System.out.println(i);
+}
+```
+
+输出：
+```text
+0
+2
+```
+
+遇到 i == 1 时，跳过本次循环中的后续代码，继续下一次循环。
+### 15.2 `break`
+```java
+for (int i = 0; i < 3; i++) {
+    if (i == 1) {
+        break;
+    }
+    System.out.println(i);
+}
+```
+
+输出：
+```text
+0
+```
+
+执行 break 后，整个当前循环结束。
+### 15.3 `return`
+```java
+public static void test() {
+    for (int i = 0; i < 3; i++) {
+        if (i == 1) {
+            return;
+        }
+        System.out.println(i);
+    }
+
+    System.out.println("End");
+}
+```
+
+输出：
+```text
+0
+```
+
+执行 return 后，test() 方法直接结束，因此 "End" 不会打印。
+

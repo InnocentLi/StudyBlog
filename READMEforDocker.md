@@ -1,3 +1,46 @@
+## Docker 开发环境
+
+先安装并启动 Docker Desktop，在项目根目录执行：
+
+```powershell
+docker compose up -d --build
+```
+
+该命令构建并启动开发容器。项目目录会挂载到容器的 `/workspace`，修改代码后无需重新构建镜像。
+后续只需 `docker compose up -d` 启动已有容器；修改 Dockerfile 后再使用 `--build`。
+
+在项目根目录运行以下命令，或将示例路径替换为自己的文件路径：
+
+**Java**
+
+```powershell
+docker compose exec dev sh -c 'mkdir -p /tmp/studyblog && javac -encoding UTF-8 -d /tmp/studyblog BackEnd/Java/JavaBasic/01Encapsulation.java && java -cp /tmp/studyblog BackEnd.Java.JavaBasic.Student'
+```
+
+预期输出 `20`。运行其他 Java 示例时，请替换源文件路径和主类名；有 `package` 声明时使用包含包名的主类名。
+
+**Python 和 Node.js**
+
+```powershell
+docker compose exec dev python3 path/to/example.py
+docker compose exec dev node path/to/example.js
+```
+
+**C 和 C++**
+
+```powershell
+docker compose exec dev sh -c 'gcc path/to/example.c -o /tmp/studyblog-c && /tmp/studyblog-c'
+docker compose exec dev sh -c 'g++ path/to/example.cpp -o /tmp/studyblog-cpp && /tmp/studyblog-cpp'
+```
+
+停止开发容器：
+
+```powershell
+docker compose stop
+```
+
+运行环境默认使用 JDK 17；以上命令中的容器路径使用 `/`，即使宿主机是 Windows 也一样。
+
 ## Docker 本地开发环境
 
 仓库根目录提供了包含 C++、Java、Node.js 和 Python 工具链的开发容器。需要先安装并启动 Docker Desktop。

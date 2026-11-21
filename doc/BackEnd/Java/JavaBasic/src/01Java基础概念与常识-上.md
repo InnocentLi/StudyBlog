@@ -79,6 +79,7 @@ import javax.servlet.http.HttpServlet;
 // Jakarta EE 9+
 import jakarta.servlet.http.HttpServlet;
 ```
+
 这也解释了为什么现代 Spring Boot 项目中经常会出现 jakarta.*。
 ### 1.3 什么是 Java ME？
 Java ME（Java Platform, Micro Edition），即 Java 平台微型版。
@@ -99,7 +100,6 @@ Java ME（Java Platform, Micro Edition），即 Java 平台微型版。
 | 应用场景 | 通用程序、服务器程序 | Web 系统、企业级服务 | 嵌入式设备、早期手机 |
 | 与 Java SE 的关系 | 基础平台 | 建立在 SE 基础上 | 针对受限设备的独立平台体系 |
 | 现在使用情况 | 非常普遍 | 非常普遍 | 相对较少 |
-| 面试重要性 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐ |
 
 > 面试重点：Java EE 和 Spring Boot 是什么关系？<br>
 > Java EE/Jakarta EE 主要是一套企业级 Java 标准规范，而 Spring Boot 是 Spring 生态中用于简化应用开发和配置的框架。
@@ -110,7 +110,6 @@ Java ME（Java Platform, Micro Edition），即 Java 平台微型版。
 ```java
 @RestController
 public class UserController {
-
     @GetMapping("/user")
     public String getUser() {
         return "Hello Java";
@@ -192,9 +191,9 @@ JRE（Java Runtime Environment）主要提供运行 Java 程序所需要的组�
 
 传统的理解是：
 
-$$
+```math
 \text{JRE} = \text{JVM} + \text{Java 基础类库} + \text{运行支持组件}
-$$
+```
 
 例如 Java 程序需要使用：
 ```java
@@ -241,7 +240,6 @@ javap 不是将字节码完整还原为 Java 源代码的反编译器，主要�
 | 是否提供 javac | 否 | 通常否 | 是 |
 | 是否用于编译 | 否 | 否 | 是 |
 | 是否可以运行 Java | 需要相关运行组件 | 是 | 是 |
-| 面试重要性 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 
 
 ## 3. JDK 9 之后为什么不再强调 JRE？
@@ -325,13 +323,13 @@ JDK 是 Java 开发工具包，除了运行 Java 程序，还提供 javac、java
 
 最后记住两个公式即可：
 
-$$
+```math
 \text{Jakarta EE} = \text{Java SE 基础} + \text{企业级规范}
-$$
+```
 
-$$
+```math
 \text{JDK} = \text{运行环境} + \text{开发工具}
-$$
+```
 
 其中运行环境包含 JVM、标准类库等组件。
 
@@ -384,9 +382,9 @@ Hello.class
 以加法为例：
 Java 源代码
 
-$$
+```math
 \text{int } c = a + b
-$$
+```
 
 javac 编译
 ```text
@@ -478,19 +476,22 @@ public static long calculate() {
 所以，Java 是编程语言，JVM 是运行平台，两者不能完全画等号。
 ### 5.5 字节码相关公式
 关系式一：Java 典型编译流程
-$$
+
+```math
 \boxed{\text{Java 源码}\xrightarrow{\text{javac}}\text{JVM 字节码}}
-$$
+```
 
 关系式二：字节码运行流程
-$$
+
+```math
 \boxed{\text{字节码}\xrightarrow{\text{JVM}}\text{执行效果}}
-$$
+```
 
 关系式三：跨平台的核心条件
-$$
+
+```math
 \boxed{\text{统一字节码格式}+\text{兼容 JVM 实现}\Rightarrow\text{跨平台运行能力}}
-$$
+```
 
 
 
@@ -645,9 +646,10 @@ JVM 在应用运行的过程中可以收集方法执行频率和类型分布等�
 这也是为什么 Java 性能测试经常需要预热。
 
 示意关系如下：
-$$
+
+```math
 T_{\text{总执行}}\approx T_{\text{解释执行}}+T_{\text{JIT 编译}}+T_{\text{已编译代码执行}}+T_{\text{其他运行开销}}
-$$
+```
 
 这里是将程序的主要执行成本进行概念性拆分，并不是说所有 Java 程序都必然经历每个阶段。
 
@@ -732,19 +734,21 @@ flowchart TD
 这样可以减少应用启动时需要完成的工作。
 
 用一个简化公式表示：
-$$
+
+```math
 T_{\text{启动}}=
 T_{\text{运行时初始化}}+
 T_{\text{框架初始化}}+
 T_{\text{业务初始化}}
-$$
+```
 
 AOT 的目标之一，是将部分能够提前完成的初始化和分析工作转移到构建阶段。
 
 但是不能简单理解为：
-$$
+
+```math
 T_{\text{AOT 启动}}=0
-$$
+```
 
 即使使用 AOT，程序依然需要初始化必要组件、建立连接、加载数据和启动服务。
 ### 7.5 为什么 AOT 不一定比 JIT 快？
@@ -771,11 +775,12 @@ AOT 通常更有利于减少启动和预热成本，JIT 则有机会在长期运
 但这并不是绝对规律。不同 AOT 编译器、Profile-Guided Optimization（PGO）以及不同业务负载，都可能改变性能结果。
 
 可以使用一个简化模型分析：
-$$
+
+```math
 T_{\text{总成本}}=
 T_{\text{启动}}+
 N\times T_{\text{单次请求}}
-$$
+```
 
 其中：
 - $T_{\text{启动}}$：应用从启动到可用所需时间。
@@ -960,17 +965,18 @@ JDK 9 曾通过 JEP 295 引入实验性的 jaotc AOT 编译工具，该工具后
 
 不要把已经移除的 jaotc 与目前仍然使用的 GraalVM Native Image 混为一谈。
 ### 7.10 AOT 与 JIT 的关系公式
-$$
+
+```math
 \boxed{\text{JIT = 运行期间编译}}
-$$
+```
 
-$$
+```math
 \boxed{\text{AOT = 运行之前编译}}
-$$
+```
 
-$$
+```math
 \boxed{\text{Spring AOT}\neq\text{GraalVM Native Image}}
-$$
+```
 
 最后一个关系特别重要：
 
@@ -1088,9 +1094,10 @@ Classpath Exception 是为 Java 类库链接等场景提供的重要例外条款
 不过，如果修改、重新发布 OpenJDK 自身的组件，还需要遵守相应的许可证要求。
 
 所以：
-$$
+
+```math
 \boxed{\text{使用 OpenJDK 开发商业软件}\neq\text{必须开源全部业务代码}}
-$$
+```
 
 ### 8.8 为什么还有 Amazon Corretto、Eclipse Temurin 等 JDK？
 因为 OpenJDK 是开源项目，不同厂商可以基于 OpenJDK 源代码构建自己的 JDK 发行版，并提供不同的维护与支持方案。
@@ -1120,9 +1127,10 @@ flowchart TD
 尤其需要注意：JDK 是否能免费使用，与是否获得长期安全更新支持，是两个不同的问题。
 
 可以用下面这个关系概括：
-$$
+
+```math
 \boxed{\text{JDK 选型}=\text{兼容性}+\text{安全更新}+\text{支持周期}+\text{许可成本}}
-$$
+```
 
 这不是数学上的加法计算，而是企业选型时应考虑的四个主要维度。
 
@@ -1289,13 +1297,14 @@ try (FileInputStream input =
 | 常见风险 | 对象保留、资源未关闭等 | 悬空指针、重复释放、内存泄漏等 |
 
 简化理解：
-$$
-\boxed{\text{Java：对象堆内存主要由 GC 管理}}
-$$
 
-$$
+```math
+\boxed{\text{Java：对象堆内存主要由 GC 管理}}
+```
+
+```math
 \boxed{\text{C++：资源主要通过生命周期和所有权管理}}
-$$
+```
 
 ### 9.4 Java 为什么不支持类多继承？
 Java 的类只能直接继承一个父类。
@@ -1365,9 +1374,10 @@ class Duck implements Flyable, Swimmable {
 ```
 
 这说明：
-$$
+
+```math
 \boxed{\text{Java 类：单继承 + 多接口实现}}
-$$
+```
 
 注意，Java 8 开始接口支持 default 方法。如果多个接口提供冲突的默认方法，实现类需要按照 Java 的规则解决冲突，通常需要显式重写。
 ### 9.5 Java 和 C++ 的泛型有什么不同？
@@ -1690,9 +1700,10 @@ System.out.println(a << 2); // 20
 左移两位：00000101 → 00010100，十进制 5 → 20。
 
 公式：
-$$
+
+```math
 x \ll n = x \times 2^n
-$$
+```
 
 前提：结果不能超出类型的表示范围。
 ### 13.2 带符号右移 `>>`
@@ -1703,9 +1714,10 @@ System.out.println(a >> 2); // 5
 ```
 
 对于非负整数：
-$$
+
+```math
 x \gg n = \left\lfloor \frac{x}{2^n} \right\rfloor
-$$
+```
 
 对于负整数，Java 的算术右移同样相当于向负无穷取整：
 ```java
@@ -1713,9 +1725,10 @@ System.out.println(-9 >> 1); // -5
 ```
 
 因为：
-$$
+
+```math
 \left\lfloor -9/2 \right\rfloor = -5
-$$
+```
 
 注意：负数右移不能简单理解成 Java 整数除法。 Java 整数除法向零截断，-9 / 2 的结果是 -4。
 ### 13.3 无符号右移 `>>>`

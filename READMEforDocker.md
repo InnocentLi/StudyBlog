@@ -23,6 +23,12 @@ docker compose exec dev sh -c 'mkdir -p /tmp/studyblog && javac -encoding UTF-8 
 docker compose exec dev sh -c 'mkdir -p /tmp/studyblog && javac -encoding UTF-8 -d /tmp/studyblog BackEnd/Java/JavaBasic/02Inheritance.java && java -Dfile.encoding=UTF-8 -cp /tmp/studyblog BackEnd.Java.JavaBasic.InheritanceDemo'
 ```
 
+运行引用拷贝、浅拷贝和深拷贝示例：
+
+```powershell
+docker compose exec dev sh -c 'mkdir -p /tmp/studyblog && javac -encoding UTF-8 -d /tmp/studyblog BackEnd/Java/JavaBasic/02copy.java && java -Dfile.encoding=UTF-8 -cp /tmp/studyblog BackEnd.Java.JavaBasic.CopyDemo'
+```
+
 运行其他 Java 示例时，请替换源文件路径和主类名；有 `package` 声明时使用包含包名的主类名。
 
 **Python 和 Node.js**

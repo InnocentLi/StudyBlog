@@ -3,6 +3,8 @@
  *  docker run --rm --mount "type=bind,source=${PWD}\BackEnd\Java\JavaBasic,target=/src,readonly" eclipse-temurin:17-jdk sh -c 'javac -encoding UTF-8 -d /tmp /src/02Encapsulation.java && java -cp /tmp BackEnd.Java.JavaBasic.Student'
  */
 
+//封装（Encapsulation）示例
+// 通过封装可以保护对象的状态，避免外部直接修改字段，提供受控的访问方式
 package BackEnd.Java.JavaBasic;
 
 class Student {
@@ -21,6 +23,7 @@ class Student {
         this.name = name;
     }
 
+    // 提供受控的读取入口 （得到年龄）
     public int getAge() {
         return age;
     }
@@ -44,5 +47,6 @@ class Student {
         student.setAge(20);
 
         System.out.println(student.getAge()); // 20
+        System.out.println(student.getName()); // Tom
     }
 }

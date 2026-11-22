@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CopyDemo",
+            "request": "launch",
+            "mainClass": "BackEnd.Java.JavaBasic.CopyDemo",
+            "projectName": "StudyBlog_fa1c6b50"
+        },
+        {
+            "type": "java",
             "name": "InheritanceDemo",
             "request": "launch",
             "mainClass": "BackEnd.Java.JavaBasic.InheritanceDemo",

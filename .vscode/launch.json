@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "StringDemo",
+            "request": "launch",
+            "mainClass": "BackEnd.Java.JavaBasic.StringDemo",
+            "projectName": "StudyBlog_fa1c6b50"
+        },
+        {
+            "type": "java",
+            "name": "ObjectOthersDemo",
+            "request": "launch",
+            "mainClass": "BackEnd.Java.JavaBasic.ObjectOthersDemo",
+            "projectName": "StudyBlog_fa1c6b50"
+        },
+        {
+            "type": "java",
             "name": "CopyDemo",
             "request": "launch",
             "mainClass": "BackEnd.Java.JavaBasic.CopyDemo",

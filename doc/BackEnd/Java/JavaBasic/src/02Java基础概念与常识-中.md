@@ -949,6 +949,7 @@ Java 中的对象拷贝主要涉及三种情况：
 
 完整可运行示例：[查看三种拷贝的 Java 代码](../../../../../BackEnd/Java/JavaBasic/02copy.java)。
 
+
 ```java
 class Address {
     private String city;
@@ -2211,11 +2212,50 @@ public class Main {
 </details>
 
 
-## 13. Java String 详解：String、StringBuilder、StringBuffer 与字符串常量池
+------
+
+
+
+
+
+
+## 13.String
+### 13.0 Java String 详解：String、StringBuilder、StringBuffer 与字符串常量池
 
 这一部分是 Java 基础中非常重要的内容，涉及 字符串不可变性、内存管理、JVM 字节码、编译器优化和字符串常量池。
 
-我会按照你提供的 JavaGuide 原文顺序整理，重点解释运行原理，并使用完整 Java 示例说明每种情况。
+
+详细总结：
+
+1. 可变性
+
+String：不可变（Immutable）。任何修改操作都会返回新对象，原对象内容永不改变
+StringBuilder：可变。直接修改内部字符数组，操作高效但线程不安全
+StringBuffer：可变。与 StringBuilder 相同，但所有修改方法加了 synchronized 锁保证线程安全
+
+2. 线程安全性
+
+String：天然线程安全（因为不可变，无法被修改）
+StringBuilder：非线程安全，多线程并发修改会导致数据竞争和长度错误
+StringBuffer：单个方法线程安全（有锁保护），但多个方法组合操作不保证原子性
+
+3. 性能对比
+
+String：每次拼接创建新对象，大量字符串操作性能最差
+StringBuilder：直接修改缓冲区，单线程性能最优，推荐用于循环拼接
+StringBuffer：同步锁开销，性能比 StringBuilder 低 10%-15%，仅多线程场景才必要
+
+4. 字符串常量池
+
+JVM 维护的全局字符串池，存储所有字面量字符串（如 "Hello"）
+相同内容的字符串直接复用池中对象，省内存
+new String("ab") 创建新对象，不入池；"ab" 进入池；.intern() 强制入池
+
+5. 使用场景
+
+String：一般字符串存储、读取，少量拼接
+StringBuilder：单线程循环拼接、动态构建字符串（如 SQL、JSON）
+StringBuffer：多线程共享可变字符串（罕见），当今已被 StringBuilder + 外部同步取代
 
 ### 13.1 String、StringBuffer、StringBuilder 的区别
 这三个类都用于处理字符串，但在可变性、线程安全性和性能方面存在明显区别。
@@ -2337,7 +2377,7 @@ flowchart TD
 
 AbstractStringBuilder 提供了字符串缓冲区的核心操作。
 
-下面是简化后的 JDK 8z 实现：
+下面是简化后的 JDK 8 实现：
 
 ```java
 abstract class AbstractStringBuilder
@@ -2373,6 +2413,7 @@ abstract class AbstractStringBuilder
 ```
 
 其中：
+
 - value：内部存储数组。
 - count：当前实际保存的字符数量。
 - ensureCapacityInternal()：检查是否需要扩容。
@@ -3067,7 +3108,9 @@ true
 - 两个对象的内容相同，但引用不同。
 
 池中的对象和 new 创建的对象不同，但字符串内容相同。
-注意：字符串字面量的解析、对象创建和类初始化等时机与 JVM 实现有关，因此不要把“创建 1 或 2 个对象”误解为任何环境下都能逐行观察到严格固定的分配次数。
+
+> [!TIP]
+> 字符串字面量的解析、对象创建和类初始化等时机与 JVM 实现有关，因此不要把"创建 1 或 2 个对象"误解为任何环境下都能逐行观察到严格固定的分配次数。
 
 #### 13.8.3 对应的 JDK 8 字节码
 源代码：
@@ -3159,7 +3202,7 @@ public class Main {
         System.out.println("s1 == s3: " + (s1 == s3));
         System.out.println("s3 == s4: " + (s3 == s4));
         System.out.println("s1 == s4: " + (s1 == s4));
-
+    
         System.out.println("s1.equals(s3): " + s1.equals(s3));
     }
 }
@@ -3606,7 +3649,7 @@ Java3
 
 这里考察的是运算符求值与结合规则，不是对象是否位于字符串池中。
 
-### 13.13 综合测试：把重要知识点放在一起
+### 13.13 综合测试：(字符串)
 下面是一份可以直接运行的 Java 程序，覆盖这一章最容易混淆的几种情况。
 
 ```java
@@ -3630,7 +3673,6 @@ public class StringTest {
         // =====================================
 
         String c = new String("hello");
-
         System.out.println("2: " + (a == c));
         // false：new 创建不同对象
 
@@ -3643,7 +3685,6 @@ public class StringTest {
         // =====================================
 
         String d = c.intern();
-
         System.out.println("4: " + (a == d));
         // true：获取池中的规范化引用
 
@@ -3664,7 +3705,6 @@ public class StringTest {
 
         String f = "he";
         String g = "llo";
-
         String h = f + g;
 
         System.out.println("6: " + (a == h));
@@ -3677,7 +3717,6 @@ public class StringTest {
 
         final String i = "he";
         final String j = "llo";
-
         String k = i + j;
 
         System.out.println("7: " + (a == k));
@@ -3690,7 +3729,6 @@ public class StringTest {
 
         final String m = getPrefix();
         final String n = "llo";
-
         String o = m + n;
 
         System.out.println("8: " + (a == o));
@@ -3702,7 +3740,6 @@ public class StringTest {
         // =====================================
 
         StringBuilder sb = new StringBuilder();
-
         sb.append("he");
         sb.append("llo");
 
@@ -3747,4 +3784,3 @@ public class StringTest {
 
 第三层：编译器和 JVM 的优化。 编译期常量表达式可以进行常量折叠，普通变量的拼接在运行时计算。JDK 8 通常通过 StringBuilder 编译字符串拼接，JDK 9 起默认使用 invokedynamic 和 StringConcatFactory。这些优化不会改变 Java 语言中字符串不可变及引用比较的基本语义。
 
-这三个层次需要联系起来理解，而不是单独背诵结论。尤其要区分：final 修饰变量、String 对象不可变、编译期常量表达式，它们是三个相关但不同的概念。
